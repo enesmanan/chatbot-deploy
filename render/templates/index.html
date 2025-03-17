@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stil Danışmanı</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">
+            <button class="hamburger-menu" onclick="toggleSidebar()" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="title">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Stil Danışmanı Logo" class="logo">
+                <span>Stil Danışmanı</span>
+            </div>
+        </div>
+
+        <!-- Chat Header'ın altına ekleyin -->
+        <div class="gender-selector">
+            <div class="gender-title">Cinsiyet Seçimi:</div>
+            <div class="gender-buttons">
+                <button id="male-button" class="gender-button" onclick="setGender('erkek')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="7" r="5"></circle>
+                        <path d="M12 12v8"></path>
+                        <path d="M8 19h8"></path>
+                    </svg>
+                    <span>Erkek</span>
+                </button>
+                <button id="female-button" class="gender-button" onclick="setGender('kadın')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="7" r="5"></circle>
+                        <path d="M12 12v8"></path>
+                        <path d="M9 18h6"></path>
+                    </svg>
+                    <span>Kadın</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Geçmiş Görüşmeler</h2>
+                <button onclick="toggleSidebar()">×</button>
+            </div>
+            <button onclick="startNewChat()" class="new-chat-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span>Yeni Görüşme</span>
+            </button>
+            <div class="conversation-list">
+                {% for conv in conversations %}
+                    <a href="{{ url_for('load_conversation', session_id=conv.id) }}" 
+                       class="conversation-item {% if conv.id == current_session %}active{% endif %}">
+                        <div class="conversation-title">{{ conv.title }}</div>
+                        <div class="conversation-date">{{ conv.created_at }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-messages" id="chat-messages">
+            {% if not conversation_history %}
+                <div class="message bot welcome">
+                    <div class="message-content markdown-body">
+                        {{ renderMarkdown("Merhaba! Ben stil danışmanınızım. Kişisel stiliniz, gardırop düzenlemeniz veya özel bir etkinlik için giyim önerileri konusunda size nasıl yardımcı olabilirim?") | safe }}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% for message in conversation_history %}
+                <div class="message {% if message.role == 'user' %}user{% else %}bot{% endif %}">
+                    <div class="message-content markdown-body">
+                        {{ renderMarkdown(message.content) | safe }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input">
+            <div class="upload-button-container">
+                <label for="image-upload" class="upload-button" title="Fotoğraf Yükle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </label>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            </div>
+            <input type="text" 
+                   id="user-input" 
+                   placeholder="Stil danışmanınıza sorunuzu yazın..." 
+                   autocomplete="off"
+                   autofocus>
+            <button onclick="sendMessage()" class="send-button">
+                <span>Gönder</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Marked.js configuration
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return code;
+            },
+            breaks: true,
+            gfm: true
+        });
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Start new chat
+        function startNewChat() {
+            fetch('/new_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      window.location.href = '/';
+                  }
+              })
+              .catch(error => {
+                  console.error('Error starting new chat:', error);
+              });
+        }
+
+        // Cinsiyet seçimi için değişken
+        let selectedGender = localStorage.getItem('selectedGender') || 'erkek';
+        
+        // Sayfa yüklendiğinde cinsiyet butonunu aktif et
+        document.addEventListener('DOMContentLoaded', function() {
+            updateGenderButtons();
+            
+            // Cinsiyet seçimini localStorage'dan al ve uygula
+            selectedGender = localStorage.getItem('selectedGender') || 'erkek';
+            updateGenderButtons();
+            
+            console.log("Başlangıç cinsiyet seçimi:", selectedGender); // Debug için
+        });
+        
+        // Cinsiyet seçimini güncelle
+        function setGender(gender) {
+            selectedGender = gender;
+            localStorage.setItem('selectedGender', gender);
+            updateGenderButtons();
+            
+            // Kullanıcıya bilgi mesajı göster
+            const chatMessages = document.getElementById('chat-messages');
+            const genderUpdateMsg = document.createElement('div');
+            genderUpdateMsg.className = 'message bot';
+            genderUpdateMsg.innerHTML = `<div class="message-content markdown-body">Cinsiyet seçiminiz "${gender === 'erkek' ? 'Erkek' : 'Kadın'}" olarak güncellendi. Bundan sonraki önerilerim bu seçime göre olacak.</div>`;
+            chatMessages.appendChild(genderUpdateMsg);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Cinsiyet butonlarını güncelle
+        function updateGenderButtons() {
+            document.getElementById('male-button').classList.remove('active');
+            document.getElementById('female-button').classList.remove('active');
+            
+            if (selectedGender === 'erkek') {
+                document.getElementById('male-button').classList.add('active');
+            } else {
+                document.getElementById('female-button').classList.add('active');
+            }
+        }
+        
+        // Yüklenen görsel için değişken
+        let currentUploadedImage = null;
+        
+        // Görsel yükleme işleyicisi
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Dosya boyutu kontrolü (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("Dosya boyutu 10MB'dan küçük olmalıdır.");
+                return;
+            }
+            
+            // Dosya türü kontrolü
+            if (!file.type.startsWith('image/')) {
+                alert("Lütfen bir görsel dosyası yükleyin.");
+                return;
+            }
+            
+            // Görseli önizleme
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Görsel verisi
+                currentUploadedImage = {
+                    data: e.target.result,
+                    name: file.name,
+                    type: file.type
+                };
+                
+                // Kullanıcıya bilgi mesajı - boş bırak, kullanıcı kendi yazacak
+                const input = document.getElementById('user-input');
+                input.value = "";
+                input.placeholder = "Fotoğrafla ilgili ne öğrenmek istediğinizi yazın...";
+                input.focus();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Mesaj gönderme fonksiyonunu güncelle
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            const chatMessages = document.getElementById('chat-messages');
+            
+            if (message === '' && !currentUploadedImage) return;
+            
+            // Kullanıcı mesajını ekle
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user';
+            userMessageDiv.innerHTML = `<div class="message-content markdown-body">${marked.parse(message)}</div>`;
+            chatMessages.appendChild(userMessageDiv);
+            
+            // Yükleniyor göstergesini ekle
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'message bot loading-indicator';
+            loadingIndicator.innerHTML = `
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(loadingIndicator);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Input'u temizle ve devre dışı bırak
+            input.value = '';
+            input.disabled = true;
+            
+            try {
+                // Güncel cinsiyet seçimini kontrol et
+                const currentGender = localStorage.getItem('selectedGender') || 'erkek';
+                
+                // İstek gövdesi oluştur
+                const requestBody = { 
+                    message: message,
+                    gender: currentGender
+                };
+                
+                console.log("Seçilen cinsiyet:", currentGender); // Debug için
+                
+                // Eğer görsel yüklendiyse, görseli de ekle
+                if (currentUploadedImage) {
+                    requestBody.image = currentUploadedImage.data;
+                }
+                
+                // API'ye istek gönder
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Yükleniyor göstergesini kaldır
+                chatMessages.removeChild(loadingIndicator);
+                
+                // Bot yanıtını ekle
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot';
+                botMessageDiv.innerHTML = `<div class="message-content markdown-body">${marked.parse(data.response)}</div>`;
+                chatMessages.appendChild(botMessageDiv);
+                
+                // Konuşma geçmişini güncelle
+                if (data.conversations) {
+                    updateSidebar(data.conversations);
+                }
+                
+                // Görsel değişkenini sıfırla
+                currentUploadedImage = null;
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Yükleniyor göstergesini kaldır
+                chatMessages.removeChild(loadingIndicator);
+                
+                // Hata mesajı ekle
+                const errorMessageDiv = document.createElement('div');
+                errorMessageDiv.className = 'message bot error';
+                errorMessageDiv.innerHTML = `<div class="message-content markdown-body">Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.</div>`;
+                chatMessages.appendChild(errorMessageDiv);
+                
+                // Görsel değişkenini sıfırla
+                currentUploadedImage = null;
+            }
+            
+            // Input'u tekrar etkinleştir
+            input.disabled = false;
+            input.focus();
+        }
+
+        // Update sidebar content
+        function updateSidebar(conversations) {
+            const conversationList = document.querySelector('.conversation-list');
+            conversationList.innerHTML = conversations.map(conv => `
+                <a href="/conversation/${conv.id}" 
+                   class="conversation-item ${conv.id === '{{ current_session }}' ? 'active' : ''}">
+                    <div class="conversation-title">${conv.title}</div>
+                    <div class="conversation-date">${conv.created_at}</div>
+                </a>
+            `).join('');
+        }
+        
+        // Enter key to send message
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Cinsiyet seçimini localStorage'dan al ve uygula
+            selectedGender = localStorage.getItem('selectedGender') || 'erkek';
+            updateGenderButtons();
+            
+            console.log("Başlangıç cinsiyet seçimi:", selectedGender); // Debug için
+        });
+    </script>
+</body>
+</html>
