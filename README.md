@@ -3,11 +3,12 @@
 Bu repo, Developer MultiGroup'un GenAI bootcamp serisi için hazırlanmış chatbot deployment örneklerini içermektedir. Üç farklı framework kullanarak oluşturulmuş konsept chatbot uygulamaları bulunmaktadır.
 
 📺 **YouTube Yayını:** [Basic Chatbot Deployment & Final Project Details](https://www.youtube.com/watch?v=3if2pvH8JzA)
+
 🎤 **Sunum:** [https://speakerdeck.com/enesfehmimanan/basic-chatbot-deployment-and-final-project-details](https://speakerdeck.com/enesfehmimanan/basic-chatbot-deployment-and-final-project-details)
 
 ## 📋 İçerik
 
-### 1. 🍳 [Mutfak Asistanı (Streamlit)](https://github.com/enesmanan/chatbot-deploy/tree/main/streamlit)
+### 1. 🍳 [Mutfak Asistanı (Streamlit)](https://github.com/enesmanan/chatbot-deploy/tree/main/streamlit) - [Deploy Link](https://mutfak-asistani.streamlit.app/)
 
 Streamlit kullanarak oluşturulmuş, kullanıcıların elindeki malzemelere göre yemek tarifleri öneren bir chatbot uygulaması. Kullanıcılar malzemelerini metin olarak girebilir veya malzemelerin fotoğrafını yükleyebilirler.
 
@@ -17,7 +18,7 @@ Streamlit kullanarak oluşturulmuş, kullanıcıların elindeki malzemelere gör
 - Türk mutfağı odaklı tarif önerileri
 - Diğer dünya mutfaklarından alternatif öneriler
 
-### 2. 🎬 [Film ve Dizi Öneri Asistanı (Gradio)](https://github.com/enesmanan/chatbot-deploy/tree/main/gradio)
+### 2. 🎬 [Film ve Dizi Öneri Asistanı (Gradio)](https://github.com/enesmanan/chatbot-deploy/tree/main/gradio) - [Deploy Link](https://huggingface.co/spaces/enesmanan/dizi-film-oneri)
 
 Gradio kullanarak oluşturulmuş, kullanıcıların film ve dizi önerileri alabileceği bir chatbot uygulaması. Google'ın Gemini AI modelini kullanarak kullanıcıların tercihlerine göre kişiselleştirilmiş öneriler sunar.
 
@@ -27,7 +28,7 @@ Gradio kullanarak oluşturulmuş, kullanıcıların film ve dizi önerileri alab
 - Kullanıcının sevdiği filmleri dikkate alma
 - Basit ve kullanıcı dostu arayüz
 
-### 3. 👔 [Stil Danışmanı (HTML/CSS/Flask)](https://github.com/enesmanan/chatbot-deploy/tree/main/render)
+### 3. 👔 [Stil Danışmanı (HTML/CSS/Flask)](https://github.com/enesmanan/chatbot-deploy/tree/main/render) - [Deploy Link](https://chatbot-deploy-7yqr.onrender.com/)
 
 Flask framework'ü kullanarak oluşturulmuş ve Render platformunda deploy edilebilen, kullanıcılara kişiselleştirilmiş moda ve stil tavsiyeleri sunan bir chatbot uygulaması.
 
