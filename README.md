@@ -3,6 +3,7 @@
 Bu repo, Developer MultiGroup'un GenAI bootcamp serisi için hazırlanmış chatbot deployment örneklerini içermektedir. Üç farklı framework kullanarak oluşturulmuş konsept chatbot uygulamaları bulunmaktadır.
 
 📺 **YouTube Yayını:** [Basic Chatbot Deployment & Final Project Details](https://www.youtube.com/watch?v=3if2pvH8JzA)
+🎤 **Sunum:** [https://speakerdeck.com/enesfehmimanan/basic-chatbot-deployment-and-final-project-details](https://speakerdeck.com/enesfehmimanan/basic-chatbot-deployment-and-final-project-details)
 
 ## 📋 İçerik
 

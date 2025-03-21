@@ -2,6 +2,9 @@
 
 Bu proje, kullanıcıların dizi ve film önerileri alabileceği bir yapay zeka destekli chatbot uygulamasıdır. Google'ın Gemini 1.5 Flash modelini kullanan bu asistan, kullanıcıların tercihlerine göre kişiselleştirilmiş öneriler sunar.
 
+## 🌐 Deploy Link
+- [https://huggingface.co/spaces/enesmanan/dizi-film-oneri](https://huggingface.co/spaces/enesmanan/dizi-film-oneri)
+
 ## 🎬 Özellikler
 
 - **Kişiselleştirilmiş Öneriler**: Kullanıcı tercihlerine ve geçmiş beğenilerine göre öneriler

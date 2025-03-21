@@ -2,6 +2,8 @@
 
 Mutfak Asistanı, elinizde bulunan malzemelere göre yemek tarifleri öneren akıllı bir yardımcıdır. Malzemelerinizi yazılı olarak girebilir veya malzemelerin fotoğrafını yükleyerek AI destekli öneriler alabilirsiniz.
 
+## 🌐 Deploy Link
+- [https://mutfak-asistani.streamlit.app/](https://mutfak-asistani.streamlit.app/)
 
 ## ✨ Özellikler
 
